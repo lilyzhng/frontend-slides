@@ -269,41 +269,30 @@ Before designing, understand the content. Ask via AskUserQuestion:
 
 ### Step 1.1: Presentation Context + Images (Single Form)
 
-**IMPORTANT:** Ask ALL 4 questions in a single AskUserQuestion call so the user can fill everything out at once before submitting.
+**CRITICAL: You MUST ask exactly 4 questions in a single AskUserQuestion call. Do NOT submit with only 3 questions — Question 4 (Images) is required.**
 
-**Question 1: Purpose**
-- Header: "Purpose"
-- Question: "What is this presentation for?"
-- Options:
-  - "Pitch deck" — Selling an idea, product, or company to investors/clients
-  - "Teaching/Tutorial" — Explaining concepts, how-to guides, educational content
-  - "Conference talk" — Speaking at an event, tech talk, keynote
-  - "Internal presentation" — Team updates, strategy meetings, company updates
+Call AskUserQuestion with these 4 questions (all in one call):
 
-**Question 2: Slide Count**
-- Header: "Length"
-- Question: "Approximately how many slides?"
-- Options:
-  - "Short (5-10)" — Quick pitch, lightning talk
-  - "Medium (10-20)" — Standard presentation
-  - "Long (20+)" — Deep dive, comprehensive talk
+1. **Purpose** — Header: "Purpose", Question: "What is this presentation for?"
+   - "Pitch deck" — Selling an idea, product, or company to investors/clients
+   - "Teaching/Tutorial" — Explaining concepts, how-to guides, educational content
+   - "Conference talk" — Speaking at an event, tech talk, keynote
+   - "Internal presentation" — Team updates, strategy meetings, company updates
 
-**Question 3: Content**
-- Header: "Content"
-- Question: "Do you have the content ready, or do you need help structuring it?"
-- Options:
-  - "I have all content ready" — Just need to design the presentation
-  - "I have rough notes" — Need help organizing into slides
-  - "I have a topic only" — Need help creating the full outline
+2. **Slide Count** — Header: "Length", Question: "Approximately how many slides?"
+   - "Short (5-10)" — Quick pitch, lightning talk
+   - "Medium (10-20)" — Standard presentation
+   - "Long (20+)" — Deep dive, comprehensive talk
 
-**Question 4: Images**
-- Header: "Images"
-- Question: "Do you have images to include? Select 'No images' or select Other and type/paste your image folder path."
-- Options:
-  - "No images" — Text-only presentation (use CSS-generated visuals instead)
-  - "./assets" — Use the `assets/` folder in the current project
+3. **Content** — Header: "Content", Question: "Do you have the content ready, or do you need help structuring it?"
+   - "I have all content ready" — Just need to design the presentation
+   - "I have rough notes" — Need help organizing into slides
+   - "I have a topic only" — Need help creating the full outline
 
-The user can select **"Other"** to type or paste any custom folder path (e.g. `~/Desktop/screenshots`). This way the image folder path is collected in the same form — no extra round-trip.
+4. **Images** — Header: "Images", Question: "Do you have images to include? Select 'No images' or select Other and type/paste your image folder path."
+   - "No images" — Text-only presentation (use CSS-generated visuals instead)
+   - "./assets" — Use the `assets/` folder in the current project
+   - _(User can select "Other" to type any custom folder path, e.g. `~/Desktop/screenshots`)_
 
 If user has content, ask them to share it (text, bullet points, images, etc.).
 
@@ -324,27 +313,34 @@ If user has content, ask them to share it (text, bullet points, images, etc.).
    - **Content signal:** What feature or concept does this image represent? (e.g., "chat_ui.png" → "conversational interface feature")
    - Shape: square, landscape, portrait, circular
    - Dominant colors (important for style compatibility later)
-4. **Present the evaluation and proposed slide outline to the user** — Show which images are usable and which are not, with reasons. Then show the proposed slide outline with image assignments.
+4. **Present the evaluation to the user** — Show which images are usable and which are not, with reasons.
 
-**Co-design: curated assets inform the outline**
+5. **Confirm image selection via AskUserQuestion** — Let the user approve or adjust the image picks before building the outline:
 
-After evaluation, the **usable** images become context for planning the slide structure alongside text content. This is not "plan slides then add images" — it's designing the presentation around both text and visuals from the start:
+**Question: Image Selection**
+- Header: "Images"
+- Question: "Do these image selections look right?"
+- Options:
+  - "Looks good" — Use the selected images to build the slide outline
+  - "Adjust selection" — I want to include/exclude different images
+
+If "Adjust selection", ask the user what to change, then re-present.
+
+6. **Build the slide outline** — Once images are confirmed, design the slide structure around both text and curated visuals:
 
 - 3 usable product screenshots → plan 3 feature slides, each anchored by one screenshot
 - 1 usable logo → title slide and/or closing slide
 - 1 usable architecture diagram → dedicated "How It Works" slide
-- 1 blurry/irrelevant image → excluded, with explanation to user
 
-This means curated images are factored in **before** style selection (Phase 2) and **before** HTML generation (Phase 3). They are co-equal context in the design process.
+This is the **co-design** step: text content + confirmed images together inform the slide structure from the start, not a post-hoc "fit images in after the fact." Images are factored in **before** style selection (Phase 2) and **before** HTML generation (Phase 3).
 
-5. **Confirm outline via AskUserQuestion** — Do NOT break the flow by asking the user to type free text. Use AskUserQuestion to confirm:
+7. **Confirm outline via AskUserQuestion**:
 
 **Question: Outline Confirmation**
 - Header: "Outline"
-- Question: "Does this slide outline and image selection look right?"
+- Question: "Does this slide outline look right?"
 - Options:
   - "Looks good, proceed" — Move on to style selection
-  - "Adjust images" — I want to change which images go where
   - "Adjust outline" — I want to change the slide structure
 
 This keeps the entire flow in the AskUserQuestion format without dropping to free-text chat.
@@ -1257,13 +1253,15 @@ class TiltEffect {
 1. User: "I want to create a pitch deck for my AI startup"
 2. Skill asks about purpose, length, content, and images (single form)
 3. User shares bullet points, selects `./assets` folder
-4. **Evaluate:** Skill views each image (multimodal), builds slide outline with image assignments:
-   - `logo.png` → USABLE → title/closing slide
-   - `chat_ui.png` → USABLE → feature slide
-   - `dashboard.png` → USABLE → feature slide
-   - `launch_card.png` → USABLE → feature slide
+4. **Evaluate:** Skill views each image (multimodal), marks usability:
+   - `logo.png` → USABLE (brand identity)
+   - `chat_ui.png` → USABLE (conversational UI)
+   - `dashboard.png` → USABLE (monitoring)
+   - `launch_card.png` → USABLE (deployment)
    - `blurry_team.jpg` → NOT USABLE (too low resolution)
-5. User confirms outline via AskUserQuestion
+5. User confirms image selection via AskUserQuestion
+6. Skill builds slide outline with confirmed images
+7. User confirms outline via AskUserQuestion
 6. Skill asks about desired feeling (Impressed + Excited)
 7. Skill generates 3 style previews
 8. User picks Style B (Neon Cyber)
